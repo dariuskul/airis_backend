@@ -7,5 +7,5 @@ app.get('/', (_, res: Response) => {
 });
 
 app.listen(process.env.PORT || 3000, () => {
-  console.log(`Connected to apps`)
+  console.log(`Connected to appsss`)
 })

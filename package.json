@@ -4,6 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
+    "build": "tsc",
     "start": "./node_modules/.bin/ts-node src/app.ts",
     "dev": "nodemon -x ./node_modules/.bin/ts-node src/app.ts"
   },
