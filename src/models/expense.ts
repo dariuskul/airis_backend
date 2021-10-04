@@ -18,6 +18,11 @@ const ExpenseSchema = new Schema<IExpense>({
     type: String,
     required: [true, 'Description field is required'],
   },
+  category: {
+    type: Schema.Types.ObjectId,
+    ref: 'category',
+    required: [true, 'Category is required'],
+  },
 })
 
 const expense = model('expense', ExpenseSchema);

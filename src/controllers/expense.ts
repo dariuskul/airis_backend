@@ -5,7 +5,7 @@ import { IExpense } from "../types/expense";
 
 export const getExpenses = async (_: Request, res: Response) => {
   try {
-    const expenses: Array<IExpense> = Expense.find();
+    const expenses: Array<IExpense> = await Expense.find().populate('category');
     res.status(200).json(expenses);
   } catch (err) {
     res.status(404).json({ message: err })
@@ -36,7 +36,7 @@ export const updateExpense = async (req: Request, res: Response) => {
   const { id: _id } = req.params;
   const updatedExpense = req.body;
 
-  if (!Types.ObjectId.isValid(_id)) return res.status(404).send('No post with that id');
+  if (!Types.ObjectId.isValid(_id)) return res.status(404).send('No expense with that id');
 
   const updateExpense = await Expense.findOneAndUpdate({ _id }, { ...updatedExpense, _id }, { new: true });
   res.status(200).json(updateExpense);
@@ -46,7 +46,7 @@ export const updateExpense = async (req: Request, res: Response) => {
 export const removeExpense = async (req: Request, res: Response) => {
   const { id: _id } = req.params;
 
-  if (!Types.ObjectId.isValid(_id)) return res.status(404).send('No post with that id');
+  if (!Types.ObjectId.isValid(_id)) return res.status(404).send('No expense with that id');
 
   await Expense.findOneAndDelete({ _id });
   res.status(200).json({ message: 'Expense was removed' });
