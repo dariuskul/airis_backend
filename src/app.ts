@@ -21,4 +21,4 @@ app.all('*', (_, res) => {
 });
 console.log(process.env.CONNECTION_URL);
 mongoose.connect(process.env.CONNECTION_URL!).then(() =>
-  app.listen(process.env.PORT || 3000, () => console.log(`Server running`))).catch((error) => console.log(error));
+  app.listen(process.env.PORT || 3500, () => console.log(`Server running`))).catch((error) => console.log(error));

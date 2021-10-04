@@ -16,6 +16,7 @@ const ReportSchema = new Schema<IReport>({
   expenses: [{
     type: Schema.Types.ObjectId,
     ref: 'expense',
+    required: [true, 'At least one expense is required']
   }],
   status: {
     type: String,

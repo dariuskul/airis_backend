@@ -27,6 +27,9 @@ export const getReport = async (req: Request, res: Response) => {
 export const createReport = async (req: Request, res: Response) => {
   const report = req.body;
   const newReport = new Report({ ...report });
+  if (newReport.expenses.length <= 1) {
+    return res.status(404).send({ error: 'At least one expense should be included into the report' });
+  }
   try {
     await newReport.save();
     res.status(200).json(newReport);
@@ -56,18 +59,7 @@ export const removeReport = async (req: Request, res: Response) => {
 };
 
 export const generatePdf = async (req: Request, res: Response) => {
-  const pdf = await generatePDF(`
-  <html>
-    <head>
-      <title>Test PDF</title>
-    </head>
-    <body>
-       Sugeneruota ataskaita
-    </body>
-  </html>
-`);
-  res.set("Content-Type", "application/pdf");
-  res.send(pdf);
+  res.status(200).json({ message: 'Report generation' });
 };
 
 
