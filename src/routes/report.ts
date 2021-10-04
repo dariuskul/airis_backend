@@ -1,10 +1,11 @@
 import express from 'express';
-import { createReport, getReports, removeReport, updateReport } from '../controllers/report';
+import { createReport, generatePdf, getReports, removeReport, updateReport } from '../controllers/report';
 
 const router = express.Router();
 
 router.get('/', getReports);
 router.post('/', createReport);
+router.get('/pdf', generatePdf);
 router.patch('/', updateReport);
 router.delete('/:id', removeReport);
 
