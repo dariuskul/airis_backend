@@ -14,7 +14,10 @@ app.use('/category', category);
 app.use('/report', report);
 
 app.get('/', (_, res: Response) => {
-  res.send('Hello, its airisss');
+  res.send('Hello, its airis');
+});
+app.all('*', (_, res) => {
+  res.status(404).json({ message: 'Not found' });
 });
 console.log(process.env.CONNECTION_URL);
 mongoose.connect(process.env.CONNECTION_URL!).then(() =>

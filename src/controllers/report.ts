@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { Types } from "mongoose";
 import Report from "../models/report";
 import { IReport } from "../types/report";
+import { generatePDF } from "../utilities/generatePDF";
 export const getReports = async (_: Request, res: Response) => {
   try {
     const reports: Array<IReport> = await Report.find().populate({
@@ -52,6 +53,21 @@ export const removeReport = async (req: Request, res: Response) => {
 
   await Report.findOneAndDelete({ _id });
   res.status(200).json({ message: 'Report was removed' });
+};
+
+export const generatePdf = async (req: Request, res: Response) => {
+  const pdf = await generatePDF(`
+  <html>
+    <head>
+      <title>Test PDF</title>
+    </head>
+    <body>
+       Sugeneruota ataskaita
+    </body>
+  </html>
+`);
+  res.set("Content-Type", "application/pdf");
+  res.send(pdf);
 };
 
 
