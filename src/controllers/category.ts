@@ -4,7 +4,7 @@ import Category from '../models/category';
 import { Types } from "mongoose";
 export const getCategories = async (_: Request, res: Response) => {
   try {
-    const categories: Array<ICategory> = Category.find();
+    const categories: Array<ICategory> = await Category.find();
     res.status(200).json(categories);
   } catch (err) {
     res.status(404).json({ err });
