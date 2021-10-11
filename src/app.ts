@@ -2,6 +2,8 @@ import express, { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import expense from './routes/expense';
 import category from './routes/category';
+import user from './routes/user';
+import product from './routes/product';
 import report from './routes/report';
 import dotenv from 'dotenv'
 
@@ -12,9 +14,11 @@ app.use(express.json());
 app.use('/expense', expense);
 app.use('/category', category);
 app.use('/report', report);
+app.use('/user', user);
+app.use('/product', product);
 
 app.get('/', (_, res: Response) => {
-  res.send('Hello, its airis');
+  res.send('200');
 });
 app.all('*', (_, res) => {
   res.status(404).json({ message: 'Not found' });

@@ -27,7 +27,7 @@ export const getReport = async (req: Request, res: Response) => {
 export const createReport = async (req: Request, res: Response) => {
   const report = req.body;
   const newReport = new Report({ ...report });
-  if (newReport.expenses.length <= 1) {
+  if (newReport.expenses.length < 1) {
     return res.status(404).send({ error: 'At least one expense should be included into the report' });
   }
   try {
@@ -57,6 +57,12 @@ export const removeReport = async (req: Request, res: Response) => {
   await Report.findOneAndDelete({ _id });
   res.status(200).json({ message: 'Report was removed' });
 };
+
+export const getUserExpenes = async (req: Request, res: Response) => {
+  console.log('ha');
+
+};
+
 
 export const generatePdf = async (req: Request, res: Response) => {
   res.status(200).json({ message: 'Report generation' });

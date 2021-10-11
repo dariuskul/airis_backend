@@ -24,6 +24,10 @@ export const getExpense = async (req: Request, res: Response) => {
 export const createExpense = async (req: Request, res: Response) => {
   const expense = req.body;
   const newExpense = new Expense({ ...expense });
+  console.log(newExpense.products.length);
+  if (newExpense.products.length < 1) {
+    return res.status(404).send({ error: 'At least one product should be included into the expense' });
+  }
   try {
     await newExpense.save();
     res.status(200).json(newExpense);

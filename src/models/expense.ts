@@ -23,6 +23,16 @@ const ExpenseSchema = new Schema<IExpense>({
     ref: 'category',
     required: [true, 'Category is required'],
   },
+  products: [{
+    type: Schema.Types.ObjectId,
+    ref: 'product',
+    required: [true, 'At least one product is required']
+  }],
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: 'user',
+    required: [true, 'User is required'],
+  }
 })
 
 const expense = model('expense', ExpenseSchema);

@@ -1,5 +1,6 @@
 
 import { IExpense } from "./expense";
+import { IUser } from "./user";
 
 export interface IReport {
   dateCreated: Date,
@@ -8,4 +9,5 @@ export interface IReport {
   subTotal: number,
   discount: number,
   total: number,
+  user: IUser,
 }

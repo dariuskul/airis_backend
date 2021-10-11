@@ -33,6 +33,11 @@ const ReportSchema = new Schema<IReport>({
     required: true,
     default: 0,
   },
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: 'user',
+    required: [true, 'At least one expense is required']
+  },
 
 })
 
