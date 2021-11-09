@@ -2,36 +2,59 @@ import { Request, Response } from "express";
 import { Types } from "mongoose";
 import User from "../models/user";
 import Report from "../models/report";
-import Product from "../models/product";
 import { IUser } from "../types/user";
-import { IReport } from "../types/report";
-import expense from "../models/expense";
+import { auth, create, tokenRefresh } from "../services/auth";
+
+export const authenticate = async (req: Request, res: Response) => {
+  const { username, password } = req.body;
+  if (!username || !password) {
+    res.status(400).json({ error: 'Provide username and password' });
+  }
+  try {
+    const user = await auth(req.body);
+    setTokenCookie(res, user.refreshToken);
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(400).json(error);
+  }
+}
+
+export const refreshToken = async (req: Request, res: Response) => {
+  const token = req.cookies.refreshToken;
+  try {
+    const { refreshToken, ...user } = await tokenRefresh({ token: token });
+    setTokenCookie(res, refreshToken);
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(400).json({ error })
+  }
+}
+
+
 export const getUsers = async (_: Request, res: Response) => {
   try {
     const users: Array<IUser> = await User.find();
     res.status(200).json(users);
   } catch (err) {
-    res.status(404).json({ message: err });
+    res.status(400).json({ message: err });
   }
 };
 
 export const getUser = async (req: Request, res: Response) => {
   const { id: _id } = req.params;
   if (!Types.ObjectId.isValid(_id))
-    return res.status(404).send("No user was found with provided id");
+    return res.status(400).send("No user was found with provided id");
 
   const user: IUser = await User.findById(_id);
   return res.status(200).json(user);
 };
 
 export const createUser = async (req: Request, res: Response) => {
-  const user = req.body;
-  const newUser = new User({ ...user });
   try {
-    await newUser.save();
-    res.status(200).json(newUser);
+    const user = await create(req.body)
+    res.status(200).json(user);
   } catch (error) {
-    res.status(404).json({ message: error.message as string });
+    res.status(400).json(error);
   }
 };
 
@@ -40,7 +63,7 @@ export const updateUser = async (req: Request, res: Response) => {
   const updatedUser = req.body;
 
   if (!Types.ObjectId.isValid(_id))
-    return res.status(404).send("No user with that id");
+    return res.status(400).send("No user with that id");
 
   const updateUser = await User.findOneAndUpdate(
     { _id },
@@ -54,7 +77,7 @@ export const removeUser = async (req: Request, res: Response) => {
   const { id: _id } = req.params;
 
   if (!Types.ObjectId.isValid(_id))
-    return res.status(404).send("No user with that id");
+    return res.status(400).send("No user with that id");
 
   await User.findOneAndDelete({ _id });
   res.status(200).json({ message: "User was removed" });
@@ -64,20 +87,27 @@ export const getUserProducts = async (req: Request, res: Response) => {
   const { userId, reportId } = req.params;
   const user = await User.find({ userId });
   if (!user) {
-    return res.status(404).send("User not found with id");
+    return res.status(400).send("User not found with id");
   }
   const userReports = await Report.find({ user }).populate('expenses');
 
   if (!userReports) {
-    return res.status(404).send("Reports not found");
+    return res.status(400).send("Reports not found");
   }
   const report = userReports.find((report: any) => report._id.toString() === reportId);
-  console.log(report);
 
   if (!report) {
-    return res.status(404).send("Report not found");
+    return res.status(400).send("Report not found");
   }
   res.status(200).json(report.expenses);
 
 };
+
+const setTokenCookie = (res: Response, token: string) => {
+  const cookieOptions = {
+    httpOnly: true,
+    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+  };
+  res.cookie('refreshToken', token, cookieOptions);
+}
 

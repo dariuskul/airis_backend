@@ -1,4 +1,5 @@
 import { Schema, model } from "mongoose";
+import { ERoles } from "../enums/roles";
 import { IUser } from "../types/user";
 
 const UserSchema = new Schema<IUser>({
@@ -26,6 +27,11 @@ const UserSchema = new Schema<IUser>({
     type: String,
     required: [true, "Username is required"],
   },
+  role: {
+    type: String,
+    required: true,
+    default: ERoles.User,
+  }
 });
 
 const report = model("user", UserSchema);

@@ -1,13 +1,14 @@
 import express from 'express';
-import { createReport, generatePdf, getReport, getReports, getUserExpenes, removeReport, updateReport } from '../controllers/report';
+import { createReport, generatePdf, getReport, getReports, removeReport, updateReport } from '../controllers/report';
+import { authorize } from '../middleware/auth';
 
 const router = express.Router();
 
-router.get('/', getReports);
-router.get('/:id', getReport);
-router.post('/', createReport);
-router.get('/pdf', generatePdf);
-router.patch('/:id', updateReport);
-router.delete('/:id', removeReport);
+router.get('/', authorize(['ADMIN']), getReports);
+router.get('/:id', authorize(), getReport);
+router.post('/', authorize(), createReport);
+router.post('/pdf/user/:id/:send?', authorize(), generatePdf);
+router.patch('/:id', authorize(), updateReport);
+router.delete('/:id', authorize(), removeReport);
 
 export = router;

@@ -1,12 +1,13 @@
 import express from 'express';
 import { createExpense, getExpense, getExpenses, removeExpense, updateExpense } from '../controllers/expense';
+import { authorize } from '../middleware/auth';
 
 const router = express.Router();
 
-router.get('/', getExpenses);
-router.get('/:id', getExpense);
-router.post('/', createExpense);
-router.patch('/:id', updateExpense);
-router.delete('/:id', removeExpense);
+router.get('/', authorize(['Admin']), getExpenses);
+router.get('/:id', authorize(), getExpense);
+router.post('/', authorize(), createExpense);
+router.patch('/:id', authorize(), updateExpense);
+router.delete('/:id', authorize(), removeExpense);
 
 export = router;
