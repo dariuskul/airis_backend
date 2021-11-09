@@ -1,5 +1,5 @@
 import { compareSync } from 'bcryptjs'
-import config from '../../config.json';
+import config from '../config.json';
 import crypto from 'crypto-js'
 import RefreshToken from '../models/refreshToken';
 import User from '../models/user';

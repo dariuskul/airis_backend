@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express"
 import jwt from 'jsonwebtoken';
-import config from '../../config.json';
+import config from '../config.json';
 import User from '../models/user';
 export const authorize = (roles?: Array<string> | string) => {
   if (typeof roles === 'string') {
