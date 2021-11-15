@@ -92,12 +92,14 @@ export const generatePdf = async (req: Request, res: Response) => {
   if ((send && (!from || !to)) || !userId || !reportId) {
     return res.status(400).json({ error: 'Bad request' });
   }
+  console.log('test');
   try {
     const report = await Report.findById({ _id: reportId.toString() }).populate({
       path: "expenses",
       populate: [{ path: "category", select: "-_id" }, { path: "products" }],
     });
     const isAuthorizedToUpdate = await isAuthorized(req, report.user, true);
+    console.log(isAuthorizedToUpdate);
     if (!isAuthorizedToUpdate) {
       return res.status(403).send({ error: "Forbidden" });
     }

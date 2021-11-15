@@ -95,6 +95,7 @@ export const getUserByToken = (req: Request) => {
 export const isAuthorized = async (req: Request, _id: string, canAdmin?: boolean) => {
   const userId = getUserByToken(req);
   const userInfo = await User.findById(userId);
+  console.log(_id.toString(), userId, userInfo.role);
   const isAuthorizedToUpdate = _id.toString() === userId || (canAdmin && userInfo.role === ERoles.Admin);
   return isAuthorizedToUpdate;
 }

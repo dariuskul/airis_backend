@@ -73,6 +73,7 @@ export const removeExpense = async (req: Request, res: Response) => {
   try {
     const expenseById = await Expense.findById({ _id });
     const isAuthorizedToUpdate = await isAuthorized(req, expenseById.userId, true);
+    console.log(isAuthorizedToUpdate);
     if (!isAuthorizedToUpdate) {
       return res.status(403).send({ error: "Forbidden" });
     }
