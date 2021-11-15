@@ -10,7 +10,6 @@ export const buildPDF = (
   let doc = new PDFDocument({ margin: 50 });
   generateHeader(doc);
   generateInvoiceTable(doc, report);
-  console.log(report.expenses[0].products[0]);
   doc.on("data", dataCallBack);
   doc.on("end", endDataCallback);
 };

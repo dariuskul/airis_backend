@@ -74,7 +74,6 @@ export const removeReport = async (req: Request, res: Response) => {
     path: "expenses",
     populate: [{ path: "category", select: "-_id" }, { path: "products" }],
   });
-  console.log('report', report);
   try {
     const isAuthorizedToUpdate = await isAuthorized(req, report.user, true);
     if (!isAuthorizedToUpdate) {

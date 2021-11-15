@@ -36,7 +36,6 @@ export const create = async (userObject: IRegister) => {
 
   const user = new User(userObject);
   user.passwordHash = hashSync(userObject.password);
-  console.log(user);
   await user.save();
 
   return user;
