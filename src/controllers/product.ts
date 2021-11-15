@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
 import Product from "../models/product";
+import { isAuthorized } from "../services/auth";
 import { IProduct } from "../types/product";
 export const getProducts = async (_: Request, res: Response) => {
   try {
@@ -33,8 +34,17 @@ export const createProduct = async (req: Request, res: Response) => {
 
 export const updateProduct = async (req: Request, res: Response) => {
   const { id: _id } = req.params;
+  try {
+    const productById = await Product.findById({ _id });
+    const isAuthorizedToUpdate = await isAuthorized(req, productById.userId, false);
+    if (!isAuthorizedToUpdate) {
+      return res.status(403).send({ error: "Forbidden" });
+    }
+  } catch (error) {
+    const err = error.length ? error : 'Product was not found';
+    return res.status(404).send({ error: err });
+  }
   const updatedProduct = req.body;
-
   if (!Types.ObjectId.isValid(_id))
     return res.status(400).send("No product with that id");
 
@@ -48,7 +58,16 @@ export const updateProduct = async (req: Request, res: Response) => {
 
 export const removeProduct = async (req: Request, res: Response) => {
   const { id: _id } = req.params;
-
+  try {
+    const productById = await Product.findById({ _id });
+    const isAuthorizedToUpdate = await isAuthorized(req, productById.userId, true);
+    if (!isAuthorizedToUpdate) {
+      return res.status(403).send({ error: "Forbidden" });
+    }
+  } catch (error) {
+    const err = error.length ? error : 'Product was not found';
+    return res.status(404).send({ error: err });
+  }
   if (!Types.ObjectId.isValid(_id))
     return res.status(400).send("No product with that id");
 

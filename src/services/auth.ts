@@ -6,6 +6,8 @@ import User from '../models/user';
 import jwt from 'jsonwebtoken';
 import { ILogin, IRegister, IUser } from "../types/user";
 import { hashSync } from 'bcryptjs'
+import { Request } from 'express';
+import { ERoles } from '../enums/roles';
 export const auth = async ({ username, password }: ILogin) => {
   const user = await User.findOne({ username });
   if (!user || !compareSync(password, user.passwordHash)) {
@@ -33,9 +35,8 @@ export const create = async (userObject: IRegister) => {
   }
 
   const user = new User(userObject);
-
-  user.passwordHash = hashSync(userObject.password, userObject.username);
-
+  user.passwordHash = hashSync(userObject.password);
+  console.log(user);
   await user.save();
 
   return user;
@@ -82,4 +83,19 @@ const generateRefreshToken = (user: any) => {
 const userDetails = (user: IUser) => {
   const { role, username, name, surname } = user;
   return { role, username, name, surname };
+}
+
+export const getUserByToken = (req: Request) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader) {
+    const token = jwt.decode(authHeader.split(' ')[1]);
+    return token?.sub;
+  }
+}
+
+export const isAuthorized = async (req: Request, _id: string, canAdmin?: boolean) => {
+  const userId = getUserByToken(req);
+  const userInfo = await User.findById(userId);
+  const isAuthorizedToUpdate = _id.toString() === userId || (canAdmin && userInfo.role === ERoles.Admin);
+  return isAuthorizedToUpdate;
 }

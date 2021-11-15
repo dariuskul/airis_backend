@@ -12,7 +12,12 @@ const ProductSchema = new Schema<IProduct>({
   },
   quantity: {
     type: Number,
-    default: 0,
+    default: 1,
+  },
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: 'user',
+    required: [true, 'User is required'],
   }
 })
 

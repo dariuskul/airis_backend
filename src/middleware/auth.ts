@@ -17,6 +17,7 @@ export const authorize = (roles?: Array<string> | string) => {
             return res.sendStatus(403);
           }
           const userInfo = await User.findById(user?.sub);
+          console.log(userInfo.role, roles?.includes(userInfo));
           if (!userInfo || (roles?.length && !roles.includes(userInfo.role))) {
             return res.sendStatus(403);
           }

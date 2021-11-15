@@ -5,13 +5,13 @@ import { authorize } from '../middleware/auth';
 
 const router = express.Router();
 
-router.get('/', authorize([ERoles.User]), getUsers);
+router.get('/', authorize([ERoles.Admin]), getUsers);
 router.post('/authenticate', authenticate);
 router.get('/:id', authorize(), getUser);
-router.get('/:userId/reports/:reportId/expense', getUserProducts);
+router.get('/:userId/reports/:reportId/expense', authorize(), getUserProducts);
 router.post('/register', createUser);
-router.patch('/', updateUser);
-router.delete('/:id', removeUser);
-router.post('/refresh-token', refreshToken);
+router.patch('/:id', authorize(), updateUser);
+router.delete('/:id', authorize(), removeUser);
+router.post('/refresh-token', authorize(), refreshToken);
 
 export = router;

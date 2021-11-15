@@ -5,12 +5,12 @@ import { IReport } from "../types/report";
 export const buildPDF = (
   dataCallBack: any,
   endDataCallback: any,
-  reports: any
+  report: any
 ) => {
   let doc = new PDFDocument({ margin: 50 });
   generateHeader(doc);
-  generateInvoiceTable(doc, reports[0]);
-  console.log(reports[0].expenses[0].products[0]);
+  generateInvoiceTable(doc, report);
+  console.log(report.expenses[0].products[0]);
   doc.on("data", dataCallBack);
   doc.on("end", endDataCallback);
 };

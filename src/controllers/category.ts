@@ -39,5 +39,5 @@ export const removeCategory = async (req: Request, res: Response) => {
   if (!Types.ObjectId.isValid(_id)) return res.status(400).send('No category with that id');
 
   await Category.findOneAndDelete({ _id });
-  res.status(200).json({ message: 'Expense was removed' });
+  res.status(200).json({ message: 'Category was removed' });
 };

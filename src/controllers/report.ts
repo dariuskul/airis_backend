@@ -2,9 +2,11 @@ import { AnyARecord } from "dns";
 import { Request, Response } from "express";
 import { Types } from "mongoose";
 import Report from "../models/report";
+import { isAuthorized } from "../services/auth";
 import { sendEmail } from "../services/email";
 import { IReport } from "../types/report";
 import { buildPDF } from "../utilities/generatePDF";
+
 export const getReports = async (_: Request, res: Response) => {
   try {
     const reports: Array<IReport> = await Report.find().populate({
@@ -47,66 +49,87 @@ export const createReport = async (req: Request, res: Response) => {
 export const updateReport = async (req: Request, res: Response) => {
   const { id: _id } = req.params;
   const updatedReport = req.body;
+  try {
+    const report = await Report.findById({ _id });
+    const isAuthorizedToUpdate = await isAuthorized(req, report.user, false);
+    if (!isAuthorizedToUpdate) {
+      return res.status(403).send({ error: "Forbidden" });
+    }
+    const updateExpense = await Report.findOneAndUpdate(
+      { _id },
+      { ...updatedReport, _id },
+      { new: true }
+    );
+    res.status(200).json(updateExpense);
+  } catch (error) {
+    const err = error.length ? error : 'Product was not found';
+    return res.status(404).send({ error: err });
+  }
 
-  if (!Types.ObjectId.isValid(_id))
-    return res.status(400).send("No report with that id");
-
-  const updateExpense = await Report.findOneAndUpdate(
-    { _id },
-    { ...updatedReport, _id },
-    { new: true }
-  );
-  res.status(200).json(updateExpense);
 };
 
 export const removeReport = async (req: Request, res: Response) => {
   const { id: _id } = req.params;
-
-  if (!Types.ObjectId.isValid(_id))
-    return res.status(400).send("No report with that id");
-
-  await Report.findOneAndDelete({ _id });
-  res.status(200).json({ message: "Report was removed" });
-};
-
-export const generatePdf = async (req: Request, res: Response) => {
-  const { id, send } = req.params;
-  const emailInfo = req.body;
-  if (send && !emailInfo.from || !emailInfo.to) {
-    return res.status(400).json({ error: 'Bad request' });
-  }
-
-  const reports = await Report.find().populate({
+  const report = await Report.findById({ _id }).populate({
     path: "expenses",
     populate: [{ path: "category", select: "-_id" }, { path: "products" }],
   });
-  const userReports = reports?.filter(
-    (report: any) => report.user._id.toString() === id
-  );
-  const buffers: any = [];
-  const stream = res.writeHead(200, {
-    "Content-Type": "application/pdf",
-    "Content-Disposition": "attachment;filename=summary.pdf",
-  });
-  buildPDF(
-    (chunk: any) => {
-      stream.write(chunk);
-    },
-    () => {
-      stream.end();
-    },
-    userReports
-  );
-  console.log(send);
-  if (send) {
+  console.log('report', report);
+  try {
+    const isAuthorizedToUpdate = await isAuthorized(req, report.user, true);
+    if (!isAuthorizedToUpdate) {
+      return res.status(403).send({ error: "Forbidden" });
+    }
+    await Report.findOneAndDelete({ _id });
+    res.status(200).json({ message: "Report was removed" });
+  } catch (error) {
+    const err = error.length ? error : 'Report was not found';
+    return res.status(404).send({ error: err });
+  }
+};
+
+export const generatePdf = async (req: Request, res: Response) => {
+  const { from, to, userId, reportId, send } = req.body;
+  if ((send && (!from || !to)) || !userId || !reportId) {
+    return res.status(400).json({ error: 'Bad request' });
+  }
+  try {
+    const report = await Report.findById({ _id: reportId.toString() }).populate({
+      path: "expenses",
+      populate: [{ path: "category", select: "-_id" }, { path: "products" }],
+    });
+    const isAuthorizedToUpdate = await isAuthorized(req, report.user, true);
+    if (!isAuthorizedToUpdate) {
+      return res.status(403).send({ error: "Forbidden" });
+    }
+    const buffers: any = [];
+    const stream = res.writeHead(200, {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": "attachment;filename=summary.pdf",
+    });
     buildPDF(
-      buffers.push.bind(buffers),
-      () => {
-        let pdfData = Buffer.concat(buffers);
-        sendEmail(req, res, pdfData, emailInfo);
+      (chunk: any) => {
+        stream.write(chunk);
       },
-      userReports
+      () => {
+        stream.end();
+      },
+      report,
     );
+    if (send) {
+      buildPDF(
+        buffers.push.bind(buffers),
+        () => {
+          let pdfData = Buffer.concat(buffers);
+          sendEmail(req, res, pdfData, { from: from, to: to });
+        },
+        report,
+      );
+    }
+
+  } catch (error) {
+    const err = error.length ? error : 'Product was not found';
+    return res.status(404).send({ error: err });
   }
 };
 
