@@ -24,7 +24,6 @@ export const sendEmail = (req: any, res: any, pdf: any, emailInfo: any) => {
     if (err) {
       console.log(err);
     } else {
-      console.log('sent', info);
     }
   })
 }
