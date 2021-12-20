@@ -1,5 +1,5 @@
 export enum Status {
-  Open = "open",
-  Closed = "closed",
-  Done = "done",
+  Open = "Aktyvus",
+  Closed = "Uždarytas",
+  Done = "Baigtas",
 }

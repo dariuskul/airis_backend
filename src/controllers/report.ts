@@ -2,14 +2,15 @@ import { AnyARecord } from "dns";
 import { Request, Response } from "express";
 import { Types } from "mongoose";
 import Report from "../models/report";
-import { isAuthorized } from "../services/auth";
+import { getUserByToken, isAuthorized } from "../services/auth";
 import { sendEmail } from "../services/email";
 import { IReport } from "../types/report";
 import { buildPDF } from "../utilities/generatePDF";
 
-export const getReports = async (_: Request, res: Response) => {
+export const getReports = async (req: Request, res: Response) => {
+  const userId = (getUserByToken(req) as any);
   try {
-    const reports: Array<IReport> = await Report.find().populate({
+    const reports: Array<IReport> = await Report.find({ user: userId }).populate({
       path: "expenses",
       populate: { path: "category", select: "-_id" },
     });
@@ -55,6 +56,9 @@ export const updateReport = async (req: Request, res: Response) => {
     if (!isAuthorizedToUpdate) {
       return res.status(403).send({ error: "Forbidden" });
     }
+    if (!updatedReport.expenses.length) {
+      await Report.findOneAndDelete({ _id });
+    }
     const updateExpense = await Report.findOneAndUpdate(
       { _id },
       { ...updatedReport, _id },
@@ -89,7 +93,9 @@ export const removeReport = async (req: Request, res: Response) => {
 
 export const generatePdf = async (req: Request, res: Response) => {
   const { from, to, userId, reportId, send } = req.body;
+  console.log(req.body);
   if ((send && (!from || !to)) || !userId || !reportId) {
+    console.log(from, to, userId, reportId, send);
     return res.status(400).json({ error: 'Bad request' });
   }
   console.log('test');
@@ -117,6 +123,7 @@ export const generatePdf = async (req: Request, res: Response) => {
       },
       report,
     );
+
     if (send) {
       buildPDF(
         buffers.push.bind(buffers),

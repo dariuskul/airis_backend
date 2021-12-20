@@ -13,7 +13,7 @@ export const sendEmail = (req: any, res: any, pdf: any, emailInfo: any) => {
     from: emailInfo.from,
     to: emailInfo.to,
     subject: 'Report',
-    text: `You got this message, because ${emailInfo.from} sent it to you`,
+    text: `Report summary`,
     attachments: [{
       filename: 'attachment.pdf',
       content: pdf

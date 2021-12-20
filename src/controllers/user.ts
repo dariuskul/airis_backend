@@ -6,6 +6,7 @@ import { IUser } from "../types/user";
 import { auth, create, getUserByToken, isAuthorized, tokenRefresh } from "../services/auth";
 import jwt from 'jsonwebtoken';
 import { ERoles } from "../enums/roles";
+import { hashSync } from "bcryptjs";
 
 export const authenticate = async (req: Request, res: Response) => {
   const { username, password } = req.body;
@@ -67,6 +68,9 @@ export const updateUser = async (req: Request, res: Response) => {
     return res.status(403).send({ error: 'Forbidden' });
   }
   const updatedUser = req.body;
+  if (updatedUser.password) {
+    updatedUser.passwordHash = hashSync(updatedUser.password);
+  }
 
   if (!Types.ObjectId.isValid(_id))
     return res.status(400).send("No user with that id");

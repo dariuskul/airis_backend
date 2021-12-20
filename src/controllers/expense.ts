@@ -1,17 +1,33 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
 import Expense from "../models/expense";
-import { isAuthorized } from "../services/auth";
+import { getUserByToken, isAuthorized } from "../services/auth";
 import { IExpense } from "../types/expense";
 
 export const getExpenses = async (_: Request, res: Response) => {
   try {
-    const expenses: Array<IExpense> = await Expense.find().populate('category');
+    const expenses: Array<IExpense> = await Expense.find().populate({ populate: { path: 'products', model: 'product' } });
+    console.log('expenses', expenses);
     res.status(200).json(expenses);
   } catch (err) {
     res.status(400).json({ message: err })
   }
 };
+
+export const getAllUserExpenses = async (req: Request, res: Response) => {
+  const userId = (getUserByToken(req) as any);
+  try {
+    if (!userId) {
+      return res.status(403).send({ error: "Forbidden" });
+    }
+    if (userId) {
+      const expenses: Array<IExpense> = await Expense.find({ userId }).populate({ path: 'products', model: 'product' }).populate('category');
+      return res.status(200).json(expenses);
+    }
+  } catch (error) {
+    res.status(400).json({ message: error });
+  }
+}
 
 export const getExpense = async (req: Request, res: Response) => {
   const { id: _id } = req.params;
@@ -23,7 +39,7 @@ export const getExpense = async (req: Request, res: Response) => {
     }
     if (!Types.ObjectId.isValid(_id)) return res.status(400).send('No expense found with that id');
 
-    const expense: IExpense = await Expense.findById(_id);
+    const expense: IExpense = await Expense.findById(_id).populate('products');
     return res.status(200).json(expense);
   } catch (error) {
     const err = error.length ? error : 'Expense was not found';
@@ -58,7 +74,6 @@ export const updateExpense = async (req: Request, res: Response) => {
     const updatedExpense = req.body;
 
     if (!Types.ObjectId.isValid(_id)) return res.status(400).send('No expense with that id');
-
     const updateExpense = await Expense.findOneAndUpdate({ _id }, { ...updatedExpense, _id }, { new: true });
     res.status(200).json(updateExpense);
   } catch (error) {

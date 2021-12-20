@@ -79,9 +79,9 @@ const generateRefreshToken = (user: any) => {
   });
 }
 
-const userDetails = (user: IUser) => {
-  const { role, username, name, surname } = user;
-  return { role, username, name, surname };
+const userDetails = (user: any) => {
+  const { role, username, name, surname, _id } = user;
+  return { role, username, name, surname, _id };
 }
 
 export const getUserByToken = (req: Request) => {
